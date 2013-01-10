@@ -3,7 +3,7 @@ require 'commander'
 module Commander
   module Config
     %w( add_command command program global_option
-        commands alias_command default_command ).each do |meth|
+        commands alias_command default_command set_prepared_option ).each do |meth|
       eval <<-END, binding, __FILE__, __LINE__
         def self.#{meth} *args, &block
           ::Commander::Runner.instance.#{meth} *args, &block

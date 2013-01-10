@@ -36,6 +36,12 @@ module Commander
       @help_formatter_aliases = help_formatter_alias_defaults
       @program = program_defaults
       create_default_commands
+      @prepared_options = {
+        :use_help => true,
+        :use_version => true,
+        :use_trace => true,
+        :default_tracing => false
+      }
     end
     
     ##
@@ -44,22 +50,42 @@ module Commander
     def self.instance
       @singleton ||= new
     end
+
+    ##
+    # Set behaviors of prepared options.
+    # 
+    # === Keys
+    # 
+    #   :use_help         Use help option
+    #   :use_version      Use version option
+    #   :use_trace        Use trace option
+    #   :default_tracing  default behavior of tracing
+    
+    def set_prepared_option opts = {}
+      @prepared_options.merge! opts
+    end
     
     ##
     # Run command parsing and execution process.
     
     def run!
-      trace = false
+      trace = @prepared_options[:default_tracing]
       require_program :version, :description
       trap('INT') { abort program(:int_message) } if program(:int_message)
       trap('INT') { program(:int_block).call } if program(:int_block)
-      global_option('-h', '--help', 'Display help documentation') do
-        args = @args - %w[-h --help]
-        command(:help).run(*args)
-        return
+      if @prepared_options[:use_help]
+        global_option('-h', '--help', 'Display help documentation') do
+          args = @args - %w[-h --help]
+          command(:help).run(*args)
+          return
+        end
       end
-      global_option('-v', '--version', 'Display version information') { say version; return } 
-      global_option('-t', '--trace', 'Display backtrace when an error occurs') { trace = true }
+      if @prepared_options[:use_version]
+        global_option('-v', '--version', 'Display version information') { say version; return } 
+      end
+      if @prepared_options[:use_trace]
+        global_option('-t', '--trace', 'Display backtrace when an error occurs') { trace = true }
+      end
       parse_global_options
       remove_global_options options, @args
       unless trace
