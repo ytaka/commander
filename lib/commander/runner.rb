@@ -3,6 +3,7 @@ require 'optparse'
 
 module Commander
   class Runner
+    include ::Commander::UI
     
     #--
     # Exceptions
