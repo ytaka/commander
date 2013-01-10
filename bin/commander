@@ -31,8 +31,9 @@ command :init do |c|
            
         ...
         commands.each do |command|
+          command_sym = command.to_sym.inspect
           f.write <<-"...".gsub!(/^ {12}/, '')
-            command :#{command} do |c|
+            command #{command_sym} do |c|
               c.syntax = '#{name} #{command} [options]'
               c.summary = ''
               c.description = ''
